@@ -4,10 +4,6 @@ IPRANGE="194.132.209."
 
 for i in `seq -w 2 254`; do
  ORPORT=$(( ( RANDOM % (65535-1024) ) + 1024 ))
- OBFS3=$(( ( RANDOM % (65535-1024) )  + 1024 ))
- SCRAMBLESUIT=$(( ( RANDOM % (65535-1024) )  + 1024 ))
- FTE=$(( ( RANDOM % (65535-1024) )  + 1024 ))
- SCRAMBLESUITPWD=`python -c 'import base64,os; print base64.b32encode(os.urandom(20))'`
 
 cat > tor/tor$i.cfg << EOF
 Address $IPRANGE$i
@@ -19,13 +15,9 @@ DataDirectory /var/lib/tor/$i
 PidFile /var/run/tor/tor$i.pid
 Log notice file /var/log/tor/notices$i.log
 
-ServerTransportPlugin obfs3,scramblesuit exec /usr/bin/obfsproxy managed
+ServerTransportPlugin scramblesuit exec /usr/bin/obfsproxy managed
+ServerTransportPlugin obfs3,obfs4 exec /usr/bin/obfs4proxy managed
 ServerTransportPlugin fte exec /usr/local/bin/fteproxy --mode server --managed 
-ServerTransportListenAddr obfs3 $IPRANGE$i:$OBFS3 
-ServerTransportListenAddr scramblesuit $IPRANGE$i:$SCRAMBLESUIT 
-ServerTransportListenAddr fte $IPRANGE$i:$FTE
-
-ServerTransportOptions scramblesuit password=$SCRAMBLESUITPWD
 
 ContactInfo Torservers.net <admin .at. torservers .dot. net> 
 
